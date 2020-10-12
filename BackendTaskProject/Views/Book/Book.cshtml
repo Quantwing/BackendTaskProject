@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Books";
+}
+
+<h2>Books</h2>
+<div id="body" style="width: auto; display: table;">
+    <div style="display: table-row">
+        <div style="width: 200px; display: table-cell;">
+            <form>
+                <label for="bookname">Title</label>
+                <br>
+                <input type="text" id="booktitle" name="bookname" value="">
+                <br>
+                <label for="bookauthor">Author</label><br>
+                <input type="text" id="bookauthor" name="bookauthor" value="">
+                <br>
+                <label for="bookdesc">Description</label><br>
+                <textarea type="text" id="bookdesc" name="bookdesc" value="" rows="8" cols="30"> </textarea>
+                <br><br>
+                <input type="button" id="saveNewBookButton" value="Save New">
+                <input type="button" id="saveBookButton" value="Save">
+                <input type="button" id="deleteBookButton" value="Delete">
+            </form>
+        </div>
+        <div style="display: table-cell;">
+            <ul id="books"></ul>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        var booksData;
+        getBooks();
+        document.getElementById('saveNewBookButton').onclick = function () { saveNewBook(); };
+
+        function setBookList(data) {
+            document.getElementById('books').innerHTML = '';
+            $(data).each(function (i, item) {
+                $('#books').append('<li onclick=setEditableBook(' + item.id + ')>' + item.title + ' - ' + item.author + '</li>');
+            });
+        }
+
+        function setEditableBook(id) {
+            // should add/fix highlight/mark selected list item. Currently irrelevant
+            var book = -1;
+            for (i = 0; i < booksData.length; i++) {
+                if (booksData[i].id == id) {
+                    book = i;
+                    break;
+                }
+            }
+            if (book == -1) {
+                return;
+            }
+            document.getElementById('booktitle').value = booksData[book].title;
+            document.getElementById('bookauthor').value = booksData[book].author;
+            document.getElementById('bookdesc').value = booksData[book].description;
+            document.getElementById('saveBookButton').onclick = function () { saveBook(booksData[i].id); };
+            document.getElementById('deleteBookButton').onclick = function () { deleteBook(booksData[i].id); };
+        }
+
+        function getBooks() {
+            $.ajax({
+                type: 'GET',
+                url: '/book/values',
+                contentType: 'application/json;charset=utf-8',
+                success: function (data) {
+                    booksData = data;
+                    setBookList(data);
+                }
+            });
+        }
+
+        function saveBook(id) {
+            $.ajax({
+                type: 'PUT',
+                url: '/book/values/' + id,
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify({
+                    ID: id,
+                    Title: document.getElementById('booktitle').value,
+                    Author: document.getElementById('bookauthor').value,
+                    Description: document.getElementById('bookdesc').value
+                }),
+                success: function (data) {
+                    getBooks();
+                }
+            });
+        }
+
+        function saveNewBook() {
+            $.ajax({
+                type: 'POST',
+                url: '/book/values',
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify({
+                    Title: document.getElementById('booktitle').value,
+                    Author: document.getElementById('bookauthor').value,
+                    Description: document.getElementById('bookdesc').value
+                }),
+                success: function (data) {
+                    getBooks();
+                }
+            });
+        }
+
+        function deleteBook(id) {
+            console.log('/book/values/' + id);
+            $.ajax({
+                type: 'DELETE',
+                url: '/book/values/' + id,
+                contentType: 'application/json;charset=utf-8',
+                success: function (data) {
+                    getBooks();
+                }
+            });
+        }
+
+    </script>
+}
