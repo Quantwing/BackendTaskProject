@@ -47,7 +47,7 @@ namespace BackendTaskProject
             bool openBrowser = Configuration.GetValue<bool>("openbrowser");
             if (openBrowser)
             {
-                Process.Start(new ProcessStartInfo("http://localhost:50614/book") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo("http://localhost:50615/book") { UseShellExecute = true });
             }
         }
     }
